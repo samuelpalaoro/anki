@@ -16,6 +16,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kartei">
+
+  <!-- Apple Touch Icon (required for iOS "Add to Home Screen") -->
+  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
 
   <!-- Stylesheets (order matters) -->
   <link rel="stylesheet" href="./src/styles/tokens.css">
@@ -28,10 +32,23 @@
     <!-- Sidebar / Top Nav -->
     <aside class="app-sidebar" role="navigation" aria-label="Navegação principal">
       <div class="sidebar-header">
-        <a href="#/cards" class="brand-wrapper" aria-label="Kartei — ir para início">
-          <div class="brand-badge" aria-hidden="true">K</div>
-          <span class="brand-title">Kartei</span>
-        </a>
+        <!-- Brand removed from visible header per UX spec.
+             Name is preserved in <title>, manifest, and meta tags. -->
+        <div class="sidebar-header-spacer" aria-hidden="true"></div>
+
+        <!-- PWA Install button — hidden by default, shown by pwa-install.js when available -->
+        <button
+          id="btn-pwa-install"
+          class="btn-icon-nav"
+          style="display: none;"
+          aria-label="Instalar aplicativo"
+          title="Instalar aplicativo"
+        >
+          <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+        </button>
       </div>
 
       <nav class="sidebar-nav" aria-label="Seções do aplicativo">
