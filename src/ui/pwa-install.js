@@ -1,186 +1,252 @@
 /**
  * pwa-install.js
  *
- * Handles PWA installation prompt detection and the install button lifecycle.
+ * Handles PWA installation prompt detection, platform-specific guidance,
+ * and install button lifecycle.
  *
  * Responsibilities:
- * - Listens for `beforeinstallprompt` (Chrome/Edge/Android) and stores the event.
- * - Detects iOS Safari and offers "Add to Home Screen" guidance.
- * - Exposes `initInstallButton(buttonElement)` to wire up the install button.
- * - Hides the button once the app is installed (`appinstalled`).
- * - Does NOT show any UI element unless there is a real install action available.
- * - Does NOT touch IndexedDB, localStorage, or user data.
+ * - Detects standalone mode across Chromium, Safari, and iPadOS.
+ * - Listens for BeforeInstallPromptEvent (Chromium/Android) to trigger 1-click install.
+ * - Shows the install button for non-installed users on mobile and desktop.
+ * - Displays clear, native-feeling step-by-step guidance for iOS, iPadOS, and browsers
+ *   where programmatic prompt is delayed or unsupported.
+ * - Automatically hides the install button and header container once installed.
+ * - Does NOT touch IndexedDB or user data.
  */
 
-let _deferredPrompt = null; // The stored BeforeInstallPromptEvent
-
-/**
- * Detect iOS Safari — it supports "Add to Home Screen" but not the standard
- * BeforeInstallPromptEvent, and has its own standalone detection.
- * @returns {boolean}
- */
-function isIosSafari() {
-  const ua = navigator.userAgent;
-  const isIOS = /iphone|ipad|ipod/i.test(ua);
-  // iOS Chrome / Firefox also match isIOS but they use WKWebView and can't install PWAs
-  const isSafari = /safari/i.test(ua) && !/crios|fxios|opios/i.test(ua);
-  return isIOS && isSafari;
-}
+let _deferredPrompt = null;
 
 /**
- * Detect if the app is already running in standalone mode (installed).
+ * Detects if the app is currently running in standalone / PWA mode.
  * @returns {boolean}
  */
-function isStandalone() {
-  return (
+export function isStandalone() {
+  if (typeof window === 'undefined') return false;
+
+  const isStandaloneMedia =
     window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true
-  );
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches;
+
+  const isNavigatorStandalone = window.navigator && window.navigator.standalone === true;
+
+  return Boolean(isStandaloneMedia || isNavigatorStandalone);
 }
 
 /**
- * Initializes the install button element.
- * Wires up the correct behavior based on platform:
- *   - Chromium/Android: uses BeforeInstallPromptEvent
- *   - iOS Safari: shows a tooltip with manual instructions
- *   - Already installed / unsupported: button stays hidden
- *
- * @param {HTMLElement} buttonEl - The install button element
+ * Detects the user's platform family.
+ * Supports iOS (including iPadOS 13+ where Safari reports as Mac with touch).
+ * @returns {{ platform: 'ios' | 'android' | 'desktop', isMobile: boolean }}
+ */
+export function getPlatformInfo() {
+  if (typeof navigator === 'undefined') {
+    return { platform: 'desktop', isMobile: false };
+  }
+
+  const ua = navigator.userAgent || '';
+  const isIPadOS = Boolean(navigator.maxTouchPoints > 1 && /macintosh/i.test(ua));
+  const isIOS = /iphone|ipad|ipod/i.test(ua) || isIPadOS;
+  const isAndroid = /android/i.test(ua);
+  const isMobile = isIOS || isAndroid || /mobile/i.test(ua);
+
+  if (isIOS) return { platform: 'ios', isMobile: true };
+  if (isAndroid) return { platform: 'android', isMobile: true };
+  return { platform: 'desktop', isMobile };
+}
+
+/**
+ * Hides the install button and cleans up the sidebar header.
+ * @param {HTMLElement} buttonEl
+ */
+export function hideInstallButton(buttonEl) {
+  if (!buttonEl) return;
+  buttonEl.style.display = 'none';
+  const headerEl = buttonEl.closest('.sidebar-header');
+  if (headerEl) {
+    headerEl.classList.add('is-hidden');
+  }
+}
+
+/**
+ * Shows the install button and reveals the sidebar header.
+ * @param {HTMLElement} buttonEl
+ */
+export function showInstallButton(buttonEl) {
+  if (!buttonEl) return;
+  buttonEl.style.display = 'flex';
+  const headerEl = buttonEl.closest('.sidebar-header');
+  if (headerEl) {
+    headerEl.classList.remove('is-hidden');
+  }
+}
+
+/**
+ * Shows an accessible modal with platform-appropriate instructions
+ * for installing the PWA when BeforeInstallPromptEvent is not available.
+ * @param {'ios' | 'android' | 'desktop'} platform
+ */
+export function showInstallModal(platform = 'desktop') {
+  const existing = document.getElementById('pwa-install-modal');
+  if (existing) existing.remove();
+
+  let title = 'Instalar Aplicativo';
+  let subtitle = 'Instale o Kartei no seu dispositivo para acesso rápido e modo offline completo:';
+  let steps = [];
+
+  if (platform === 'ios') {
+    title = 'Instalar no iPhone / iPad';
+    subtitle = 'Para instalar o Kartei na sua tela de início pelo Safari:';
+    steps = [
+      'Toque no ícone de <strong>Compartilhar (⬆)</strong> na barra do Safari.',
+      'Role as opções para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>.',
+      'Toque em <strong>"Adicionar"</strong> no canto superior direito para confirmar.'
+    ];
+  } else if (platform === 'android') {
+    title = 'Instalar no Celular';
+    subtitle = 'Para instalar o Kartei no seu aparelho Android:';
+    steps = [
+      'Toque no menu de <strong>três pontos (⋮)</strong> no topo do seu navegador.',
+      'Selecione a opção <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.',
+      'Confirme a instalação quando a notificação aparecer.'
+    ];
+  } else {
+    title = 'Instalar no Computador';
+    subtitle = 'Para instalar o Kartei no seu navegador:';
+    steps = [
+      'Clique no ícone de instalação <strong>(⊕)</strong> na barra de endereços do navegador.',
+      'Ou abra o menu de opções <strong>(⋮)</strong> e clique em <strong>"Instalar Kartei"</strong>.'
+    ];
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'pwa-install-modal';
+  modal.className = 'modal-backdrop';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'pwa-modal-title');
+
+  modal.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-header" id="pwa-modal-title" style="display: flex; align-items: center; gap: var(--space-3);">
+        <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-primary); flex-shrink: 0;" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span>${title}</span>
+      </div>
+      <div style="color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: 1.6;">
+        <p style="margin-bottom: var(--space-3); color: var(--color-text-main);">
+          ${subtitle}
+        </p>
+        <ol style="margin-left: var(--space-5); margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2);">
+          ${steps.map((step) => `<li>${step}</li>`).join('')}
+        </ol>
+        <p style="font-size: var(--font-size-xs); color: var(--color-text-subtle);">
+          Uma vez instalado, o aplicativo inicia em tela cheia e funciona totalmente offline.
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="btn-close-pwa-modal">Entendi</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeModal = () => modal.remove();
+
+  const confirmBtn = modal.querySelector('#btn-close-pwa-modal');
+  confirmBtn?.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  const onKeydown = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', onKeydown);
+    }
+  };
+  document.addEventListener('keydown', onKeydown);
+  confirmBtn?.focus();
+}
+
+/**
+ * Handles clicks on the install button.
+ * Triggers native BeforeInstallPromptEvent if available, or displays
+ * instructions modal appropriate for the user's platform.
+ * @param {HTMLElement} buttonEl
+ */
+async function handleInstallClick(buttonEl) {
+  if (_deferredPrompt) {
+    try {
+      await _deferredPrompt.prompt();
+      const choice = await _deferredPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        hideInstallButton(buttonEl);
+      }
+    } catch (err) {
+      console.warn('[pwa] Erro ao disparar prompt de instalação:', err);
+    } finally {
+      _deferredPrompt = null;
+    }
+    return;
+  }
+
+  const { platform } = getPlatformInfo();
+  showInstallModal(platform);
+}
+
+/**
+ * Initializes the PWA install button.
+ * - Hides the button if the app is already installed in standalone mode.
+ * - Shows the button on mobile and desktop browsers if not installed.
+ * - Wires up native BeforeInstallPromptEvent or fallback modal.
+ * @param {HTMLElement} buttonEl
  */
 export function initInstallButton(buttonEl) {
   if (!buttonEl) return;
 
-  // If already installed in standalone mode, hide permanently
   if (isStandalone()) {
-    buttonEl.style.display = 'none';
+    hideInstallButton(buttonEl);
     return;
   }
 
-  // iOS Safari: show button with instructional tooltip
-  if (isIosSafari()) {
-    buttonEl.style.display = '';
-    buttonEl.setAttribute('aria-label', 'Instalar aplicativo — toque em Compartilhar e depois em "Adicionar à Tela de Início"');
-    buttonEl.title = 'Instalar: toque em Compartilhar (⬆) e depois em "Adicionar à Tela de Início"';
-
-    buttonEl.addEventListener('click', () => {
-      showIosInstallTooltip(buttonEl);
-    });
-    return;
-  }
-
-  // Chromium/Android: wait for beforeinstallprompt
-  // If it already fired (stored in _deferredPrompt), wire it up now
-  if (_deferredPrompt) {
-    activateInstallButton(buttonEl);
-    return;
-  }
-
-  // Otherwise the button stays hidden; the beforeinstallprompt listener below will activate it
-}
-
-/**
- * Wires the install button to trigger the native prompt.
- * @param {HTMLElement} buttonEl
- */
-function activateInstallButton(buttonEl) {
-  buttonEl.style.display = '';
+  showInstallButton(buttonEl);
   buttonEl.setAttribute('aria-label', 'Instalar aplicativo');
   buttonEl.title = 'Instalar aplicativo';
 
-  buttonEl.addEventListener('click', async () => {
-    if (!_deferredPrompt) return;
-
-    try {
-      await _deferredPrompt.prompt();
-      const { outcome } = await _deferredPrompt.userChoice;
-
-      if (outcome === 'accepted') {
-        buttonEl.style.display = 'none';
-      }
-    } catch (_) {
-      // Prompt may have already been used — hide the button
-      buttonEl.style.display = 'none';
-    } finally {
-      _deferredPrompt = null;
-    }
-  }, { once: true });
+  buttonEl.onclick = () => handleInstallClick(buttonEl);
 }
 
-/**
- * Shows a brief non-modal tooltip near the button for iOS instructions.
- * @param {HTMLElement} anchorEl
- */
-function showIosInstallTooltip(anchorEl) {
-  // Remove any existing tooltip
-  document.getElementById('pwa-ios-tip')?.remove();
+// ─── Global Browser Event Listeners ────────────────────────────────────────
 
-  const tip = document.createElement('div');
-  tip.id = 'pwa-ios-tip';
-  tip.setAttribute('role', 'tooltip');
-  tip.setAttribute('aria-live', 'polite');
-  tip.innerHTML = `
-    <strong>Instalar no iPhone/iPad:</strong><br>
-    Toque em <strong>⬆ Compartilhar</strong> e depois em<br>
-    <strong>"Adicionar à Tela de Início"</strong>.
-    <button id="pwa-ios-tip-close" aria-label="Fechar dica de instalação">✕</button>
-  `;
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (event) => {
+    // Prevent Chromium's mini-infobar so our own button controls the trigger
+    event.preventDefault();
+    _deferredPrompt = event;
 
-  Object.assign(tip.style, {
-    position: 'fixed',
-    bottom: '70px',
-    right: '16px',
-    zIndex: '9999',
-    background: 'var(--color-surface-2)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-md)',
-    padding: 'var(--space-3) var(--space-4)',
-    fontSize: 'var(--font-size-sm)',
-    lineHeight: '1.5',
-    color: 'var(--color-text)',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-    maxWidth: '260px'
+    const btn = document.getElementById('btn-pwa-install');
+    if (btn && !isStandalone()) {
+      showInstallButton(btn);
+    }
   });
 
-  document.body.appendChild(tip);
+  window.addEventListener('appinstalled', () => {
+    _deferredPrompt = null;
+    const btn = document.getElementById('btn-pwa-install');
+    if (btn) hideInstallButton(btn);
+  });
 
-  const closeBtn = tip.querySelector('#pwa-ios-tip-close');
-  if (closeBtn) {
-    Object.assign(closeBtn.style, {
-      position: 'absolute',
-      top: '6px',
-      right: '8px',
-      background: 'none',
-      border: 'none',
-      color: 'var(--color-text-muted)',
-      cursor: 'pointer',
-      fontSize: '14px',
-      padding: '2px'
+  // Watch for standalone display mode changes
+  const mql = window.matchMedia('(display-mode: standalone)');
+  if (mql && mql.addEventListener) {
+    mql.addEventListener('change', (e) => {
+      if (e.matches) {
+        const btn = document.getElementById('btn-pwa-install');
+        if (btn) hideInstallButton(btn);
+      }
     });
-    closeBtn.addEventListener('click', () => tip.remove());
   }
-
-  // Auto-dismiss after 8 seconds
-  setTimeout(() => tip.remove(), 8000);
 }
-
-// ─── Global event listeners ────────────────────────────────────────────────
-
-window.addEventListener('beforeinstallprompt', (event) => {
-  // Prevent Chrome's default mini-infobar
-  event.preventDefault();
-  _deferredPrompt = event;
-
-  // If the install button is already in the DOM, activate it now
-  const btn = document.getElementById('btn-pwa-install');
-  if (btn && btn.style.display !== 'none') {
-    activateInstallButton(btn);
-  } else if (btn) {
-    activateInstallButton(btn);
-  }
-});
-
-window.addEventListener('appinstalled', () => {
-  _deferredPrompt = null;
-  const btn = document.getElementById('btn-pwa-install');
-  if (btn) btn.style.display = 'none';
-});

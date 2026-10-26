@@ -39,14 +39,23 @@ if (existsSync('sw.js')) {
 }
 
 // --- Copy manifest ---
-if (existsSync('manifest.webmanifest')) {
-  cpSync('manifest.webmanifest', 'dist/manifest.webmanifest');
-  console.log('[postbuild] manifest.webmanifest copied.');
+const manifestSrc = existsSync('public/manifest.webmanifest')
+  ? 'public/manifest.webmanifest'
+  : (existsSync('manifest.webmanifest') ? 'manifest.webmanifest' : null);
+
+if (manifestSrc) {
+  cpSync(manifestSrc, 'dist/manifest.webmanifest');
+  console.log(`[postbuild] manifest.webmanifest copied from ${manifestSrc}.`);
 }
 
 // --- Copy icons ---
-if (existsSync('assets/icons')) {
+const iconsSrc = existsSync('public/assets/icons')
+  ? 'public/assets/icons'
+  : (existsSync('assets/icons') ? 'assets/icons' : null);
+
+if (iconsSrc) {
   mkdirSync('dist/assets/icons', { recursive: true });
-  cpSync('assets/icons', 'dist/assets/icons', { recursive: true });
-  console.log('[postbuild] assets/icons/ copied.');
+  cpSync(iconsSrc, 'dist/assets/icons', { recursive: true });
+  console.log(`[postbuild] assets/icons/ copied from ${iconsSrc}.`);
 }
+

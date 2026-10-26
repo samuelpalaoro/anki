@@ -61,8 +61,7 @@ async function initApp() {
 
   // ── Service Worker registration ──────────────────────────────────────────
   if ('serviceWorker' in navigator) {
-    // Register in both prod and dev (dev mode skips caching but enables SW features)
-    window.addEventListener('load', () => {
+    const registerWorker = () => {
       navigator.serviceWorker.register('./sw.js').then((registration) => {
         // Listen for a waiting SW (update available)
         registration.addEventListener('updatefound', () => {
@@ -71,9 +70,7 @@ async function initApp() {
 
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // A new SW is waiting. We can notify the user or auto-activate.
-              // For now: silently activate to avoid serving stale assets.
-              // Data in IndexedDB is NOT affected by SW updates.
+              // Silently activate to avoid serving stale assets on updates
               newWorker.postMessage({ type: 'SKIP_WAITING' });
             }
           });
@@ -89,7 +86,13 @@ async function initApp() {
         refreshing = true;
         window.location.reload();
       });
-    });
+    };
+
+    if (document.readyState === 'complete') {
+      registerWorker();
+    } else {
+      window.addEventListener('load', registerWorker);
+    }
   }
 }
 
