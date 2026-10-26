@@ -37,24 +37,26 @@ export async function renderCardsView(container, queryParams, router) {
       </div>
 
       <!-- Compact Search & Filter Toolbar -->
-      <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
-        <input type="text" id="cards-search-input" class="form-input" placeholder="Pesquisar por pergunta ou resposta..." value="${currentQuery}" style="flex: 1;">
-        <select id="cards-deck-filter" class="form-select" style="max-width: 200px;">
+      <div class="filter-bar" role="search" aria-label="Filtrar cartões">
+        <input type="text" id="cards-search-input" class="form-input" placeholder="Pesquisar por pergunta ou resposta..." value="${currentQuery}" aria-label="Pesquisar cartões" style="flex: 2; min-width: 200px;">
+        <select id="cards-deck-filter" class="form-select" aria-label="Filtrar por baralho" style="flex: 1; min-width: 140px;">
           <option value="">Todos os baralhos</option>
           ${decks.map((d) => `<option value="${d.id}" ${d.id === currentDeckId ? 'selected' : ''}>${d.name}</option>`).join('')}
         </select>
         ${(currentQuery || currentDeckId) ? `
-          <button id="btn-reset-filters" class="btn btn-ghost btn-sm" title="Limpar filtros">✕</button>
+          <button id="btn-reset-filters" class="btn btn-ghost btn-sm" title="Limpar filtros" aria-label="Limpar filtros">✕ Limpar</button>
         ` : ''}
       </div>
 
       <!-- Cards List -->
       ${filteredCards.length === 0 ? `
         <div class="empty-state">
+          <div class="empty-icon" aria-hidden="true">${(currentQuery || currentDeckId) ? '🔍' : '📋'}</div>
           <h2 class="empty-title">Nenhum cartão encontrado</h2>
           <p class="empty-desc">${(currentQuery || currentDeckId) ? 'Nenhum resultado corresponde à sua pesquisa.' : 'Crie seu primeiro cartão para começar.'}</p>
-          <button id="btn-empty-new-card" class="btn btn-primary btn-sm">+ Criar Cartão</button>
+          <button id="btn-empty-new-card" class="btn btn-primary">+ Criar Cartão</button>
         </div>
+
       ` : `
         <div class="item-list">
           ${filteredCards.map((c) => {

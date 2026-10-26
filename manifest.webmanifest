@@ -1,11 +1,11 @@
 {
-  "name": "Anki Web",
-  "short_name": "AnkiWeb",
-  "description": "Aplicativo pessoal de flashcards com repetição espaçada e persistência local",
+  "name": "Kartei — Flashcards",
+  "short_name": "Kartei",
+  "description": "Aplicativo de flashcards com repetição espaçada e persistência local no navegador.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f8f9fa",
-  "theme_color": "#d9480f",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
   "icons": [
     {
       "src": "./assets/icons/icon-192.png",

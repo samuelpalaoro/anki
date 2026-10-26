@@ -77,7 +77,7 @@ export async function renderEditorView(container, queryParams, router) {
           </div>
 
           <!-- Secondary details (Format, Tags, Image) in clean compact layout -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-3);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); margin-top: var(--space-3);">
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label" for="tags-input">Etiquetas (opcional)</label>
               <input type="text" id="tags-input" class="form-input" placeholder="ex: javascript, algoritmos" value="${card ? (card.tags || []).join(', ') : ''}">
@@ -116,7 +116,7 @@ export async function renderEditorView(container, queryParams, router) {
           </div>
 
           ${isEdit ? `
-            <div style="margin-top: var(--space-4); padding: var(--space-3); background: var(--color-surface-hover); border-radius: var(--radius-sm);">
+            <div style="margin-top: var(--space-4); padding: var(--space-3); background: var(--color-surface-2); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md);">
               <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; font-size: var(--font-size-xs);">
                 <input type="checkbox" id="chk-reset-srs">
                 Reiniciar agendamento de repetição deste cartão

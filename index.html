@@ -2,13 +2,22 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[NOME DO APP] — Flashcards & Repetição Espaçada</title>
-  <meta name="description" content="Aplicativo direto e sem distrações de flashcards com repetição espaçada e persistência local no navegador.">
-  
-  <link rel="manifest" href="./manifest.webmanifest">
-  <meta name="theme-color" content="#d9480f">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Kartei — Flashcards &amp; Repetição Espaçada</title>
+  <meta name="description" content="Aplicativo de flashcards com repetição espaçada. Estude mais em menos tempo com revisões inteligentes e persistência local no navegador.">
 
+  <!-- Google Fonts preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- PWA / Theme -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0d0f12">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Stylesheets (order matters) -->
   <link rel="stylesheet" href="./src/styles/tokens.css">
   <link rel="stylesheet" href="./src/styles/base.css">
   <link rel="stylesheet" href="./src/styles/layout.css">
@@ -16,30 +25,30 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Simplified Sidebar: Cartões, Baralhos, Estudar and discreet Configurações -->
-    <aside class="app-sidebar">
+    <!-- Sidebar / Top Nav -->
+    <aside class="app-sidebar" role="navigation" aria-label="Navegação principal">
       <div class="sidebar-header">
-        <a href="#/cards" class="brand-wrapper">
-          <div class="brand-badge">A</div>
-          <span class="brand-title">[NOME DO APP]</span>
+        <a href="#/cards" class="brand-wrapper" aria-label="Kartei — ir para início">
+          <div class="brand-badge" aria-hidden="true">K</div>
+          <span class="brand-title">Kartei</span>
         </a>
       </div>
 
-      <nav class="sidebar-nav">
-        <a href="#/cards" class="nav-link" data-route="/cards">
-          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <nav class="sidebar-nav" aria-label="Seções do aplicativo">
+        <a href="#/cards" class="nav-link" data-route="/cards" aria-label="Cartões">
+          <svg class="nav-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
           </svg>
           Cartões
         </a>
-        <a href="#/decks" class="nav-link" data-route="/decks">
-          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="#/decks" class="nav-link" data-route="/decks" aria-label="Baralhos">
+          <svg class="nav-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
           </svg>
           Baralhos
         </a>
-        <a href="#/study" class="nav-link" data-route="/study">
-          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="#/study" class="nav-link" data-route="/study" aria-label="Estudar">
+          <svg class="nav-icon" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
           </svg>
           Estudar
@@ -47,18 +56,18 @@
       </nav>
 
       <footer class="sidebar-footer">
-        <a href="#/settings" class="nav-link-subtle" data-route="/settings">
-          <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="#/settings" class="nav-link-subtle" data-route="/settings" aria-label="Configurações e Backup">
+          <svg style="width: 16px; height: 16px; flex-shrink: 0;" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
-          Configurações & Backup
+          Configurações
         </a>
       </footer>
     </aside>
 
-    <!-- Main View Content Area -->
-    <main class="app-main">
+    <!-- Main Content -->
+    <main class="app-main" id="app-main" role="main">
       <div id="app-view-container" class="app-content"></div>
     </main>
   </div>

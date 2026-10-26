@@ -24,10 +24,16 @@ export class Router {
     const [path, queryString] = rawHash.split('?');
     const queryParams = new URLSearchParams(queryString || '');
 
-    // Highlight sidebar links
-    document.querySelectorAll('.nav-link').forEach((link) => {
+    // Highlight sidebar nav links
+    const allNavLinks = document.querySelectorAll('.nav-link, .nav-link-subtle');
+    allNavLinks.forEach((link) => {
       const linkPath = link.getAttribute('data-route');
-      if (linkPath === path || (path === '/' && linkPath === '/')) {
+      const isMatch =
+        linkPath === path ||
+        (path === '/' && (linkPath === '/cards' || linkPath === '/')) ||
+        (path.startsWith('/cards') && linkPath === '/cards') ||
+        (path.startsWith('/settings') && linkPath === '/settings');
+      if (isMatch) {
         link.classList.add('active');
       } else {
         link.classList.remove('active');

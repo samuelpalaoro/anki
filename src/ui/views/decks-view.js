@@ -14,40 +14,42 @@ export async function renderDecksView(container, queryParams, router) {
         <button id="btn-create-deck" class="btn btn-primary btn-sm">+ Novo Baralho</button>
       </div>
 
-      ${decks.length === 0 ? `
+        ${decks.length === 0 ? `
         <div class="empty-state">
+          <div class="empty-icon" aria-hidden="true">🗂️</div>
           <h2 class="empty-title">Nenhum baralho criado</h2>
           <p class="empty-desc">Crie um baralho para organizar seus cartões por assunto ou disciplina.</p>
-          <button id="btn-empty-deck" class="btn btn-primary btn-sm">+ Criar Baralho</button>
+          <button id="btn-empty-deck" class="btn btn-primary">+ Criar Baralho</button>
         </div>
       ` : `
-        <div class="item-list">
+        <div class="item-list" role="list" aria-label="Lista de baralhos">
           ${decks.map((deck) => `
-            <div class="item-row" data-deck-id="${deck.id}">
+            <div class="item-row" data-deck-id="${deck.id}" role="listitem">
               <div class="item-main">
                 <div class="item-title">${deck.name}</div>
                 <div class="item-meta">
                   <span>${deck.totalCards} ${deck.totalCards === 1 ? 'cartão' : 'cartões'}</span>
-                  ${deck.dueCards > 0 ? `<span class="badge badge-due">${deck.dueCards} pendente(s)</span>` : ''}
-                  ${deck.newCards > 0 ? `<span class="badge badge-new">${deck.newCards} novo(s)</span>` : ''}
+                  ${deck.dueCards > 0 ? `<span class="badge badge-due">${deck.dueCards} pendente${deck.dueCards !== 1 ? 's' : ''}</span>` : ''}
+                  ${deck.newCards > 0 ? `<span class="badge badge-new">${deck.newCards} novo${deck.newCards !== 1 ? 's' : ''}</span>` : ''}
                 </div>
               </div>
 
               <div class="item-actions">
                 ${(deck.dueCards > 0 || deck.newCards > 0) ? `
-                  <button class="btn btn-primary btn-sm btn-study" data-deck-id="${deck.id}">Estudar</button>
+                  <button class="btn btn-primary btn-sm btn-study" data-deck-id="${deck.id}" aria-label="Estudar baralho ${deck.name}">Estudar</button>
                 ` : `
-                  <button class="btn btn-ghost btn-sm" disabled title="Tudo revisado">Revisado</button>
+                  <span class="text-subtle text-xs" style="padding: 0 var(--space-2);">✓ Em dia</span>
                 `}
-                <button class="btn btn-secondary btn-sm btn-add-card" data-deck-id="${deck.id}" title="Adicionar cartão neste baralho">+ Cartão</button>
-                <button class="btn btn-ghost btn-sm btn-view-cards" data-deck-id="${deck.id}" title="Ver cartões deste baralho">Ver</button>
-                <button class="btn btn-ghost btn-sm btn-rename-deck" data-deck-id="${deck.id}">Renomear</button>
-                <button class="btn btn-danger btn-sm btn-delete-deck" data-deck-id="${deck.id}" data-card-count="${deck.totalCards}">Excluir</button>
+                <button class="btn btn-ghost btn-sm btn-add-card" data-deck-id="${deck.id}" title="Adicionar cartão neste baralho" aria-label="Adicionar cartão ao baralho ${deck.name}">+ Cartão</button>
+                <button class="btn btn-ghost btn-sm btn-view-cards" data-deck-id="${deck.id}" title="Ver cartões deste baralho" aria-label="Ver cartões do baralho ${deck.name}">Ver</button>
+                <button class="btn btn-ghost btn-sm btn-rename-deck" data-deck-id="${deck.id}" aria-label="Renomear baralho ${deck.name}">Renomear</button>
+                <button class="btn btn-danger btn-sm btn-delete-deck" data-deck-id="${deck.id}" data-card-count="${deck.totalCards}" aria-label="Excluir baralho ${deck.name}">Excluir</button>
               </div>
             </div>
           `).join('')}
         </div>
       `}
+
 
       <!-- Modals Container -->
       <div id="deck-modal-host"></div>

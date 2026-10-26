@@ -1,10 +1,12 @@
+/* ─── App Shell ───────────────────────────────────────────────── */
 .app-container {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
   background-color: var(--color-bg);
 }
 
-/* Sidebar Navigation - Clean, focused on 3 primary areas */
+/* ─── Sidebar ─────────────────────────────────────────────────── */
 .app-sidebar {
   width: 220px;
   background-color: var(--color-surface);
@@ -15,6 +17,9 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
+  z-index: 100;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -22,20 +27,26 @@
   border-bottom: 1px solid var(--color-border-subtle);
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .brand-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  text-decoration: none;
+  color: var(--color-text-main);
+  min-width: 0;
+}
+
+.brand-wrapper:hover {
   text-decoration: none;
   color: var(--color-text-main);
 }
 
 .brand-badge {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
   background: var(--color-primary);
   color: #fff;
   font-weight: 700;
@@ -44,33 +55,40 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
+  letter-spacing: -0.01em;
 }
 
 .brand-title {
   font-size: var(--font-size-md);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  padding: var(--space-3) var(--space-2);
-  gap: 2px;
+  padding: var(--space-4) var(--space-3);
+  gap: var(--space-1);
   flex: 1;
+  overflow-y: auto;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 0.5rem var(--space-3);
+  padding: 0.625rem var(--space-3);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   font-weight: 500;
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
   text-decoration: none;
+  min-height: 44px;
+  user-select: none;
 }
 
 .nav-link:hover {
@@ -80,7 +98,7 @@
 }
 
 .nav-link.active {
-  background-color: var(--color-primary-light);
+  background-color: var(--color-primary-dim);
   color: var(--color-primary);
   font-weight: 600;
 }
@@ -89,11 +107,11 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  stroke-width: 1.8;
+  stroke-width: 1.75;
 }
 
 .sidebar-footer {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-3);
   border-top: 1px solid var(--color-border-subtle);
 }
 
@@ -103,14 +121,16 @@
   gap: var(--space-2);
   color: var(--color-text-subtle);
   font-size: var(--font-size-xs);
-  padding: 0.35rem 0.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem var(--space-3);
+  border-radius: var(--radius-md);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  min-height: 36px;
 }
 
 .nav-link-subtle:hover {
   color: var(--color-text-main);
+  background-color: var(--color-surface-hover);
   text-decoration: none;
 }
 
@@ -119,56 +139,116 @@
   font-weight: 600;
 }
 
-/* Main Content Area */
+/* ─── Main Content ────────────────────────────────────────────── */
 .app-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow-y: auto;
 }
 
 .app-content {
-  padding: var(--space-6) var(--space-8);
-  max-width: 880px;
+  padding: var(--space-8) var(--space-8);
+  max-width: 900px;
   width: 100%;
   margin: 0 auto;
 }
 
-/* Study mode occupies focused centered container */
+/* ─── Study Layout (full-height focus mode) ───────────────────── */
 .study-content-container {
   max-width: 680px;
   margin: 0 auto;
   padding: var(--space-8) var(--space-4);
 }
 
-/* Responsive */
+/* ─── Mobile: top bar navigation ─────────────────────────────── */
 @media (max-width: 768px) {
   .app-container {
     flex-direction: column;
   }
+
   .app-sidebar {
     width: 100%;
     height: auto;
-    position: static;
+    position: sticky;
+    top: 0;
     border-right: none;
     border-bottom: 1px solid var(--color-border);
+    flex-direction: row;
+    /* Allow it to shrink so the app bar is compact */
+    min-height: 0;
+    overflow: visible;
   }
+
   .sidebar-header {
     padding: var(--space-3) var(--space-4);
+    border-bottom: none;
+    border-right: 1px solid var(--color-border-subtle);
+    flex-shrink: 0;
   }
-  .sidebar-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    padding: var(--space-2) var(--space-3);
-  }
-  .nav-link {
-    padding: 0.4rem 0.75rem;
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
-  }
-  .sidebar-footer {
+
+  .brand-title {
     display: none;
   }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex: 1;
+    padding: 0 var(--space-2);
+    gap: var(--space-1);
+    overflow-x: auto;
+    overflow-y: visible;
+    align-items: center;
+    scrollbar-width: none;
+  }
+
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+    min-height: 40px;
+    border-radius: var(--radius-md);
+  }
+
+  .sidebar-footer {
+    padding: var(--space-2) var(--space-3);
+    border-top: none;
+    border-left: 1px solid var(--color-border-subtle);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-link-subtle {
+    white-space: nowrap;
+    font-size: 0;
+    /* Only show icon on mobile */
+    padding: 0.5rem;
+    min-height: 40px;
+    min-width: 40px;
+    justify-content: center;
+  }
+
+  .nav-link-subtle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .app-main {
+    overflow-y: visible;
+  }
+
+  .app-content {
+    padding: var(--space-5) var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
   .app-content {
     padding: var(--space-4) var(--space-3);
   }

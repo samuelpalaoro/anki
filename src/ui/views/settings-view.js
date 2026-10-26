@@ -16,51 +16,56 @@ export async function renderSettingsView(container, queryParams, router) {
       </div>
 
       <!-- Export Section -->
-      <div class="card-panel" style="margin-bottom: var(--space-6);">
-        <h2 style="font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--space-2);">Exportar Coleção</h2>
-        <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--space-4);">
+      <div class="card-panel" style="margin-bottom: var(--space-4);">
+        <h2 class="section-title">Exportar Coleção</h2>
+        <p class="section-desc">
           Baixe um arquivo JSON contendo todos os seus baralhos, cartões, histórico de revisões e imagens anexadas.
         </p>
-        <button id="btn-export-backup" class="btn btn-primary">Baixar Backup Completo (.json)</button>
+        <button id="btn-export-backup" class="btn btn-primary" aria-label="Baixar backup completo em JSON">Baixar Backup Completo (.json)</button>
       </div>
 
       <!-- Import Section -->
-      <div class="card-panel" style="margin-bottom: var(--space-6);">
-        <h2 style="font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--space-2);">Restaurar Backup</h2>
-        <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--space-4);">
+      <div class="card-panel" style="margin-bottom: var(--space-4);">
+        <h2 class="section-title">Restaurar Backup</h2>
+        <p class="section-desc">
           Selecione um arquivo de backup previamente exportado para restaurar ou mesclar com sua coleção existente.
         </p>
-        
-        <input type="file" id="backup-file-input" accept=".json" style="margin-bottom: var(--space-4); font-size: var(--font-size-sm);">
 
-        <div id="import-preview-area" style="display: none; background: var(--color-bg); padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4);">
-          <h3 style="font-size: var(--font-size-base); font-weight: 600; margin-bottom: var(--space-2);">Resumo do Arquivo</h3>
-          <ul id="import-stats-list" style="font-size: var(--font-size-sm); margin-left: var(--space-4); margin-bottom: var(--space-4);"></ul>
+        <div class="form-group">
+          <label class="form-label" for="backup-file-input">Arquivo de Backup (.json)</label>
+          <input type="file" id="backup-file-input" accept=".json" aria-label="Selecionar arquivo de backup JSON">
+        </div>
+
+        <div id="import-preview-area" style="display: none;">
+          <div class="banner-info" style="margin-bottom: var(--space-4);">
+            <h3 style="font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-2);">Resumo do Arquivo</h3>
+            <ul id="import-stats-list" style="font-size: var(--font-size-sm); margin-left: var(--space-4);"></ul>
+          </div>
 
           <div class="form-group">
             <label class="form-label">Estratégia de Importação:</label>
-            <label style="display: block; margin-bottom: var(--space-2); cursor: pointer;">
-              <input type="radio" name="import-strategy" value="merge" checked>
-              <strong>Mesclar:</strong> Adiciona novos registros preservando os dados já existentes no navegador.
+            <label style="display: flex; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-3); cursor: pointer; font-size: var(--font-size-sm);">
+              <input type="radio" name="import-strategy" value="merge" checked style="margin-top: 2px; flex-shrink: 0;">
+              <span><strong>Mesclar:</strong> Adiciona novos registros preservando os dados já existentes no navegador.</span>
             </label>
-            <label style="display: block; cursor: pointer;">
-              <input type="radio" name="import-strategy" value="replace">
-              <strong>Substituir:</strong> Apaga os dados locais atuais e restaura exatamente a coleção do arquivo.
+            <label style="display: flex; align-items: flex-start; gap: var(--space-2); cursor: pointer; font-size: var(--font-size-sm);">
+              <input type="radio" name="import-strategy" value="replace" style="margin-top: 2px; flex-shrink: 0;">
+              <span><strong>Substituir:</strong> Apaga os dados locais atuais e restaura exatamente a coleção do arquivo.</span>
             </label>
           </div>
 
-          <div style="display: flex; gap: var(--space-3); margin-top: var(--space-4);">
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
             <button id="btn-cancel-import" class="btn btn-secondary">Cancelar</button>
             <button id="btn-confirm-import" class="btn btn-primary">Confirmar Importação</button>
           </div>
         </div>
       </div>
 
-      <!-- Info about storage -->
+      <!-- Storage info -->
       <div class="card-panel">
-        <h2 style="font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--space-2);">Privacidade e Armazenamento</h2>
-        <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: 1.6;">
-          Todos os seus dados de estudo são armazenados <strong>localmente no seu dispositivo</strong> através da tecnologia IndexedDB. 
+        <h2 class="section-title">Privacidade e Armazenamento</h2>
+        <p class="section-desc">
+          Todos os seus dados de estudo são armazenados <strong>localmente no seu dispositivo</strong> através da tecnologia IndexedDB.
           Nenhum dado pessoal ou cartão é enviado para servidores externos. Lembre-se de realizar backups regulares antes de limpar os dados de navegação do seu dispositivo.
         </p>
       </div>
